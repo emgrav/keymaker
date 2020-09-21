@@ -33,19 +33,11 @@
                 <div class="sidebar-sticky">
                     {% match current_category %}
                         {% when Some with (val) %}
-                            {% if val == "choose" %}
-                            <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/category/choose"
-                                tabindex="-1" role="button" aria-disabled="true">
-                                <span data-feather="home"></span>
-                                Choose your Homeserver <span class="sr-only">(current)</span>
-                            </a>
-                            {% else %}
-                            <a class="nav-link" href="/category/choose">
-                                Choose your Homeserver 
-                            </a>
-                            {% endif %}
+                        <a class="nav-link" href="/">
+                            Choose your Homeserver 
+                        </a>
                         {% when None %}
-                        <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/category/choose"
+                        <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/"
                             tabindex="-1" role="button" aria-disabled="true">
                             <span data-feather="home"></span>
                             Choose your Homeserver <span class="sr-only">(current)</span>
@@ -90,11 +82,7 @@
         <!-- Main -->
         {% match current_category %}
             {% when Some with (val) %}
-                {% if val == "choose" %}
-                <h1 class="content-title">Choose your Homeserver</h1>
-                {% else %}
-                <h1 class="content-title">{{val}}</h1>
-                {% endif %}
+            <h1 class="content-title">{{val}}</h1>
             {% when None %}
             <h1 class="content-title">Choose your Homeserver</h1>
         {% endmatch %}
