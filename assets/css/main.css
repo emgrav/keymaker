@@ -16,7 +16,6 @@ body {
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 0;
   z-index: 100; /* Behind the navbar */
   padding: 48px 0 0; /* Height of navbar */
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
@@ -71,4 +70,18 @@ body {
 
 .content-title {
   color: #EB5B67;
+}
+
+p {
+  color: #dae0e5;
+}
+
+.wizard-content {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+main {
+  position: relative;
+  left: 95px;
 }

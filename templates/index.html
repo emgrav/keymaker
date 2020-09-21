@@ -26,67 +26,74 @@
             </div>
         </nav>
     </header>
-    <aside>
-        <!-- Left sidebar -->
-        <div class="row">
-            <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
-                <div class="sidebar-sticky">
-                    {% match current_category %}
-                        {% when Some with (val) %}
-                        <a class="nav-link" href="/">
-                            Choose your Homeserver 
-                        </a>
-                        {% when None %}
-                        <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/"
-                            tabindex="-1" role="button" aria-disabled="true">
-                            <span data-feather="home"></span>
-                            Choose your Homeserver <span class="sr-only">(current)</span>
-                        </a>
-                    {% endmatch %}
-
-                    <!-- TODO Add Search -->
-                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                        <span>Categories:</span>
-                    </h6>
-                    <ul class="nav flex-column mb-2">
-                        {% for category in categories %}
-                        <li class="nav-item">
-                            <!--TODO Make sure to actually mark the active as active and not the first-->
-                            {% match current_category %}
-                                {% when Some with (val) %}
-                                    {% if val == category %}
-                                    <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/category/{{category}}"
-                                        tabindex="-1" role="button" aria-disabled="true">
-                                        <span data-feather="home"></span>
-                                        {{category}} <span class="sr-only">(current)</span>
-                                    </a>
-                                    {% else %}
+    <div class="wizard-content">
+        <aside>
+            <!-- Left sidebar -->
+            <div class="row">
+                <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
+                    <div class="sidebar-sticky">
+                        {% match current_category %}
+                            {% when Some with (val) %}
+                            <a class="nav-link" href="/">
+                                Choose your Homeserver 
+                            </a>
+                            {% when None %}
+                            <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/"
+                                tabindex="-1" role="button" aria-disabled="true">
+                                <span data-feather="home"></span>
+                                Choose your Homeserver <span class="sr-only">(current)</span>
+                            </a>
+                        {% endmatch %}
+    
+                        <!-- TODO Add Search -->
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                            <span>Categories:</span>
+                        </h6>
+                        <ul class="nav flex-column mb-2">
+                            {% for category in categories %}
+                            <li class="nav-item">
+                                <!--TODO Make sure to actually mark the active as active and not the first-->
+                                {% match current_category %}
+                                    {% when Some with (val) %}
+                                        {% if val == category %}
+                                        <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/category/{{category}}"
+                                            tabindex="-1" role="button" aria-disabled="true">
+                                            <span data-feather="home"></span>
+                                            {{category}} <span class="sr-only">(current)</span>
+                                        </a>
+                                        {% else %}
+                                        <a class="nav-link" href="/category/{{category}}">
+                                            {{ category }}
+                                        </a>
+                                        {% endif %}
+                                    {% when None %}
                                     <a class="nav-link" href="/category/{{category}}">
                                         {{ category }}
                                     </a>
-                                    {% endif %}
-                                {% when None %}
-                                <a class="nav-link" href="/category/{{category}}">
-                                    {{ category }}
-                                </a>
-                            {% endmatch %}
-                            
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </nav>
-        </div>
-    </aside>
-    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-        <!-- Main -->
-        {% match current_category %}
-            {% when Some with (val) %}
-            <h1 class="content-title">{{val}}</h1>
-            {% when None %}
-            <h1 class="content-title">Choose your Homeserver</h1>
-        {% endmatch %}
-    </main>
+                                {% endmatch %}
+                                
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+            <!-- Main -->
+            {% match current_category %}
+                {% when Some with (val) %}
+                <h1 class="content-title">{{val}}</h1>
+                {% when None %}
+                <h1 class="content-title">Choose your Homeserver</h1>
+    
+                <p>
+                    All you need to do to sign-up is choose a Homeserver. Your Homeserver is the Home of your account in the Matrix. Its just like a e-mail.
+                </p>
+            {% endmatch %}
+        </main>
+    </div>
+    
 
     <footer class="text-muted">
 
