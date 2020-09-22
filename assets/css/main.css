@@ -94,3 +94,6 @@ p {
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Archivo Black', sans-serif;
 }
+.card {
+  background-color: #313744;
+}
