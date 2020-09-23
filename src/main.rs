@@ -13,24 +13,72 @@ use sqlx::PgPool;
 use std::env;
 use std::path::{Path, PathBuf};
 
+#[derive(Debug, Clone)]
+enum Registration {
+    Open,
+    Invite,
+    Closed,
+}
+
+#[derive(Debug, Clone)]
+struct Server {
+    name: String,
+    server_url: String,
+    logo_url: Option<String>,
+    admins: Vec<String>,
+    categories: Vec<String>,
+    rules: String,
+    description: String,
+    registration_status: Registration,
+}
+
+#[derive(Debug, Clone)]
+struct Category {
+    name: String,
+    servers: Vec<Server>,
+}
+
 #[derive(Template, Debug)]
 #[template(path = "index.html")]
 struct IndexTemplate {
-    // TODO use Vec of Category
-    categories: Vec<String>,
-    current_category: Option<String>,
-    // TODO use Vec of Servers
-    servers: Vec<String>,
+    categories: Vec<Category>,
+    current_category: Option<Category>,
 }
 
 #[get("/category/{category}")]
 async fn category_endpoint(web::Path(category): web::Path<String>) -> impl Responder {
     // TODO get available categories from database
     // TODO get available servers from database
+    let test_category = Category {
+        name: "Test".into(),
+        servers: vec![Server {
+            name: "Conduit Nordgedanken".into(),
+            server_url: "https://conduit.nordgedanken.dev".into(),
+            logo_url: None,
+            admins: vec!["@mtrnord:conduit.nordgedanken.dev".into()],
+            categories: vec!["Test".into(), "test2".into()],
+            rules: "Be Nice".into(),
+            description: "A conduit Testserver".into(),
+            registration_status: Registration::Open,
+        }],
+    };
+    let current_category = if category == "Test" {
+        test_category.clone()
+    } else {
+        Category {
+            name: "Test2".into(),
+            servers: vec![],
+        }
+    };
     IndexTemplate {
-        categories: vec!["Test".into(), "test2".into()],
-        current_category: Some(category),
-        servers: vec![],
+        categories: vec![
+            test_category,
+            Category {
+                name: "Test2".into(),
+                servers: vec![],
+            },
+        ],
+        current_category: Some(current_category),
     }
     .into_response()
 }
@@ -39,9 +87,26 @@ async fn category_endpoint(web::Path(category): web::Path<String>) -> impl Respo
 async fn index() -> impl Responder {
     // TODO get available categories from database
     IndexTemplate {
-        categories: vec!["Test".into(), "test2".into()],
+        categories: vec![
+            Category {
+                name: "Test".into(),
+                servers: vec![Server {
+                    name: "Conduit Nordgedanken".into(),
+                    server_url: "https://conduit.nordgedanken.dev".into(),
+                    logo_url: None,
+                    admins: vec!["@mtrnord:conduit.nordgedanken.dev".into()],
+                    categories: vec!["Test".into(), "test2".into()],
+                    rules: "Be Nice".into(),
+                    description: "A conduit Testserver".into(),
+                    registration_status: Registration::Open,
+                }],
+            },
+            Category {
+                name: "Test2".into(),
+                servers: vec![],
+            },
+        ],
         current_category: None,
-        servers: vec![],
     }
     .into_response()
 }

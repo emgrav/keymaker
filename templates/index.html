@@ -59,20 +59,20 @@
                                 <!--TODO Make sure to actually mark the active as active and not the first-->
                                 {% match current_category %}
                                     {% when Some with (val) %}
-                                        {% if val == category %}
-                                        <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/category/{{category}}"
+                                        {% if val.name == category.name %}
+                                        <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/category/{{ category.name }}"
                                             tabindex="-1" role="button" aria-disabled="true">
                                             <span data-feather="home"></span>
-                                            {{category}} <span class="sr-only">(current)</span>
+                                            {{ category.name }} <span class="sr-only">(current)</span>
                                         </a>
                                         {% else %}
-                                        <a class="nav-link" href="/category/{{category}}">
-                                            {{ category }}
+                                        <a class="nav-link" href="/category/{{ category.name }}">
+                                            {{ category.name }}
                                         </a>
                                         {% endif %}
                                     {% when None %}
-                                    <a class="nav-link" href="/category/{{category}}">
-                                        {{ category }}
+                                    <a class="nav-link" href="/category/{{ category.name }}">
+                                        {{ category.name }}
                                     </a>
                                 {% endmatch %}
                                 
@@ -87,7 +87,23 @@
             <!-- Main -->
             {% match current_category %}
                 {% when Some with (val) %}
-                <h1 class="content-title">{{val}}</h1>
+                <h1 class="content-title">{{val.name}}</h1>
+                <div class="card-columns">
+                    {% for server in val.servers %}
+                    <div class="card">
+                        {% match server.logo_url %}
+                            {% when Some with (val) %}
+                            <img src="{{val}}" class="card-img-top" alt="Logo">
+                            {% when None %}
+                        {% endmatch %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{server.name}}</h5>
+                            <p class="card-text">{{server.description}}</p>
+                        </div>
+                    </div>
+                        
+                    {% endfor %}
+                </div>
                 {% when None %}
                 <h1 class="content-title">Choose your Homeserver</h1>
     
@@ -102,7 +118,7 @@
                             <div class="card-body">
                               <h5 class="card-title">Special title treatment</h5>
                               <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                              <a href="#" class="btn btn-primary">Go somewhere</a>
+                              <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
                             </div>
                           </div>
                         </div>
@@ -111,7 +127,7 @@
                             <div class="card-body">
                               <h5 class="card-title">Special title treatment</h5>
                               <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                              <a href="#" class="btn btn-primary">Go somewhere</a>
+                              <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
                             </div>
                           </div>
                         </div>
@@ -122,7 +138,7 @@
                             <div class="card-body">
                               <h5 class="card-title">Special title treatment</h5>
                               <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                              <a href="#" class="btn btn-primary">Go somewhere</a>
+                              <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
                             </div>
                           </div>
                         </div>
@@ -131,7 +147,7 @@
                             <div class="card-body">
                               <h5 class="card-title">Special title treatment</h5>
                               <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                              <a href="#" class="btn btn-primary">Go somewhere</a>
+                              <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
                             </div>
                           </div>
                         </div>
