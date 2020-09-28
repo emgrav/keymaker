@@ -23,7 +23,7 @@ enum Registration {
 #[derive(Debug, Clone)]
 struct Server {
     name: String,
-    server_url: String,
+    url: String,
     logo_url: Option<String>,
     admins: Vec<String>,
     categories: Vec<String>,
@@ -56,7 +56,7 @@ async fn details_endpoint(web::Path(server): web::Path<String>) -> impl Responde
     // TODO get server from database
     let current_server = Server {
         name: "Conduit Nordgedanken".into(),
-        server_url: "https://conduit.nordgedanken.dev".into(),
+        url: "https://conduit.nordgedanken.dev".into(),
         logo_url: None,
         admins: vec!["@mtrnord:conduit.nordgedanken.dev".into()],
         categories: vec!["Test".into(), "test2".into()],
@@ -78,7 +78,7 @@ async fn category_endpoint(web::Path(category): web::Path<String>) -> impl Respo
         name: "Test".into(),
         servers: vec![Server {
             name: "Conduit Nordgedanken".into(),
-            server_url: "https://conduit.nordgedanken.dev".into(),
+            url: "https://conduit.nordgedanken.dev".into(),
             logo_url: None,
             admins: vec!["@mtrnord:conduit.nordgedanken.dev".into()],
             categories: vec!["Test".into(), "test2".into()],
@@ -117,7 +117,7 @@ async fn index() -> impl Responder {
                 name: "Test".into(),
                 servers: vec![Server {
                     name: "Conduit Nordgedanken".into(),
-                    server_url: "https://conduit.nordgedanken.dev".into(),
+                    url: "https://conduit.nordgedanken.dev".into(),
                     logo_url: None,
                     admins: vec!["@mtrnord:conduit.nordgedanken.dev".into()],
                     categories: vec!["Test".into(), "test2".into()],

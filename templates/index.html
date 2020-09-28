@@ -23,8 +23,8 @@
         <nav class="navbar navbar-dark bg-dark shadow-sm main-nav navbar-expand-md navbar-fixed-top">
             <div class="container">
                 <ul class="nav navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link" href="#"><img src="/assets/matrix.svg" width="30"
-                                height="30" class="d-inline-block align-top" alt="">
+                    <!-- <li class="nav-item"><a class="nav-link" href="#"><img src="/assets/matrix.svg" width="30"
+                                 height="30" class="d-inline-block align-top" alt="">-->
                             Matrix Serverlist</a></li>
                 </ul>
             </div>
@@ -90,6 +90,43 @@
                 <h1 class="content-title">{{val.name}}</h1>
                 <div class="card-columns">
                     {% for server in val.servers %}
+
+                    
+                    <!-- Modal -->
+                    <div class="modal fade" id="joinModal" tabindex="-1" role="dialog" aria-labelledby="joinModalLabel" aria-hidden="true" style="color: black;">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="joinModalLabel">Join Server</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <h6>Choosing a client</h6>
+
+                                    <p>The easiest way to choose a client is to head over to <a href="https://matrix.org/clients/" href="Matrix.org - Clients">Matrix.org</a> 
+                                        and scroll trough the list of Clients.
+                                    </p>
+                                    <p>
+                                        Our personal suggestions are <a href="https://fluffychat.im/de/" title="Fluffychat">Fluffychat</a> or the widely used <a href="https://element.io/" title="Element">Element</a> client.
+                                    </p>
+
+                                    <h6>Joining the server</h6>
+                                    <p>While each client does this slightly differnt the general process is similiar:</p>
+                                    <ul>
+                                        <li>Select the registatration menu on the Login Page</li>
+                                        <li>Enter the server address: <kbd>{{ server.url }}</kbd> into the Homeserver field</li>
+                                        <li>Choose your favorite Username and Password</li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         {% match server.logo_url %}
                             {% when Some with (val) %}
@@ -99,7 +136,7 @@
                         <div class="card-body">
                             <h5 class="card-title">{{server.name}}</h5>
                             <p class="card-text">{{server.description}}</p>
-                            <a href="#" class="btn btn-success">Join</a> <!--Todo add join dialog-->
+                            <a href="#" data-toggle="modal" data-target="#joinModal" class="btn btn-success">Join</a> <!--Todo add join dialog-->
                             <a href="/details/{{server.name}}" class="btn btn-link">Details</a>
                         </div>
                     </div>
@@ -163,6 +200,8 @@
     <footer class="text-muted">
 
     </footer>
+
+
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
