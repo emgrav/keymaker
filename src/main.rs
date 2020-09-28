@@ -45,6 +45,31 @@ struct IndexTemplate {
     current_category: Option<Category>,
 }
 
+#[derive(Template, Debug)]
+#[template(path = "details.html")]
+struct DetailsTemplate {
+    server: Server,
+}
+
+#[get("/details/{server}")]
+async fn details_endpoint(web::Path(server): web::Path<String>) -> impl Responder {
+    // TODO get server from database
+    let current_server = Server {
+        name: "Conduit Nordgedanken".into(),
+        server_url: "https://conduit.nordgedanken.dev".into(),
+        logo_url: None,
+        admins: vec!["@mtrnord:conduit.nordgedanken.dev".into()],
+        categories: vec!["Test".into(), "test2".into()],
+        rules: "Be Nice".into(),
+        description: "A conduit Testserver".into(),
+        registration_status: Registration::Open,
+    };
+    DetailsTemplate {
+        server: current_server,
+    }
+    .into_response()
+}
+
 #[get("/category/{category}")]
 async fn category_endpoint(web::Path(category): web::Path<String>) -> impl Responder {
     // TODO get available categories from database
@@ -145,6 +170,7 @@ async fn main() -> Result<()> {
             .service(index)
             .service(category_endpoint)
             .service(servers)
+            .service(details_endpoint)
             .route("/assets/{filename:.*.css}", web::get().to(css))
             .route("/assets/{filename:.*.js}", web::get().to(js))
     });
@@ -154,6 +180,7 @@ async fn main() -> Result<()> {
         None => {
             let host = env::var("HOST").expect("HOST is not set in .env file");
             let port = env::var("PORT").expect("PORT is not set in .env file");
+            println!("Server listening to: {}:{}", host, port);
             server.bind(format!("{}:{}", host, port))?
         }
     };
