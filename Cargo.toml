@@ -17,3 +17,7 @@ sqlx = { version = "0.3", features = [ "postgres" ] } # TODO switch to postgres 
 dotenv = "0.15.0"
 anyhow = "1"
 listenfd = "0.3.3"
+
+tracing = "0.1"
+tracing-subscriber = "0.2"
+tracing-futures = "0.2"

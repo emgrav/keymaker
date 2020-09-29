@@ -12,6 +12,8 @@ use listenfd::ListenFd;
 use sqlx::PgPool;
 use std::env;
 use std::path::{Path, PathBuf};
+use tracing::{info, instrument, Level};
+use tracing_subscriber;
 
 #[derive(Debug, Clone)]
 enum Registration {
@@ -51,6 +53,7 @@ struct DetailsTemplate {
     server: Server,
 }
 
+#[instrument]
 #[get("/details/{server}")]
 async fn details_endpoint(web::Path(server): web::Path<String>) -> impl Responder {
     // TODO get server from database
@@ -70,6 +73,7 @@ async fn details_endpoint(web::Path(server): web::Path<String>) -> impl Responde
     .into_response()
 }
 
+#[instrument]
 #[get("/category/{category}")]
 async fn category_endpoint(web::Path(category): web::Path<String>) -> impl Responder {
     // TODO get available categories from database
@@ -108,6 +112,7 @@ async fn category_endpoint(web::Path(category): web::Path<String>) -> impl Respo
     .into_response()
 }
 
+#[instrument]
 #[get("/")]
 async fn index() -> impl Responder {
     // TODO get available categories from database
@@ -136,25 +141,35 @@ async fn index() -> impl Responder {
     .into_response()
 }
 
+#[instrument]
 #[get("/api/servers")]
 async fn servers() -> impl Responder {
     HttpResponse::Ok().body("{}")
 }
 
+#[instrument]
 async fn css(req: HttpRequest) -> ActixResult<NamedFile> {
     let path: PathBuf = req.match_info().query("filename").parse().unwrap();
     let real_path = Path::new("assets/css/").join(path);
     Ok(NamedFile::open(real_path)?)
 }
 
+#[instrument]
 async fn js(req: HttpRequest) -> ActixResult<NamedFile> {
     let path: PathBuf = req.match_info().query("filename").parse().unwrap();
     let real_path = Path::new("assets/js/").join(path);
     Ok(NamedFile::open(real_path)?)
 }
 
+#[instrument]
 #[actix_web::main]
 async fn main() -> Result<()> {
+    tracing_subscriber::fmt()
+        // all spans/events with a level higher than DEBUG (e.g, info, warn, etc.)
+        // will be written to stdout.
+        .with_max_level(Level::DEBUG)
+        // sets this to be the default, global subscriber for this application.
+        .init();
     dotenv().ok();
 
     // this will enable us to keep application running during recompile: systemfd --no-pid -s http::5000 -- cargo watch -x run
@@ -180,12 +195,12 @@ async fn main() -> Result<()> {
         None => {
             let host = env::var("HOST").expect("HOST is not set in .env file");
             let port = env::var("PORT").expect("PORT is not set in .env file");
-            println!("Server listening to: {}:{}", host, port);
+            info!("Server listening to: {}:{}", host, port);
             server.bind(format!("{}:{}", host, port))?
         }
     };
 
-    println!("Starting server");
+    info!("Starting server");
     server.run().await?;
 
     Ok(())
