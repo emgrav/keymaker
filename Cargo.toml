@@ -13,7 +13,8 @@ tokio = "0.2.22"
 askama_actix = "0.11"
 askama = "0.10"
 actix-files = "0.3.0"
-sqlx = { version = "0.3", features = [ "postgres" ] } # TODO switch to postgres before going live
+sqlx-pg-migrate = "1.0.4"
+sqlx = { version = "0.4.0-beta.1", default-features = false, features = [ "runtime-tokio", "macros", "chrono", "postgres", "tls" ] }
 dotenv = "0.15.0"
 anyhow = "1"
 listenfd = "0.3.3"
