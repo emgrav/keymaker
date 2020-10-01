@@ -13,7 +13,6 @@ use sqlx::PgPool;
 use std::env;
 use std::path::{Path, PathBuf};
 use tracing::{info, instrument, Level};
-use tracing_subscriber;
 
 #[derive(Debug, Clone)]
 enum Registration {
