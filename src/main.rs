@@ -21,13 +21,15 @@ enum Registration {
     Closed,
 }
 
+// TODO add database compatible structs into a models dir
 #[derive(Debug, Clone)]
 struct Server {
+    id: i64,
     name: String,
     url: String,
     logo_url: Option<String>,
     admins: Vec<String>,
-    categories: Vec<String>,
+    categories: Vec<Category>,
     rules: String,
     description: String,
     registration_status: Registration,
@@ -35,6 +37,7 @@ struct Server {
 
 #[derive(Debug, Clone)]
 struct Category {
+    id: i64,
     name: String,
     servers: Vec<Server>,
 }
@@ -53,15 +56,16 @@ struct DetailsTemplate {
 }
 
 #[instrument]
-#[get("/details/{server}")]
-async fn details_endpoint(web::Path(server): web::Path<String>) -> impl Responder {
+#[get("/details/{server_id}")]
+async fn details_endpoint(web::Path(server_id): web::Path<i64>) -> impl Responder {
     // TODO get server from database
     let current_server = Server {
+        id: server_id,
         name: "Conduit Nordgedanken".into(),
         url: "https://conduit.nordgedanken.dev".into(),
         logo_url: None,
         admins: vec!["@mtrnord:conduit.nordgedanken.dev".into()],
-        categories: vec!["Test".into(), "test2".into()],
+        categories: vec![],
         rules: "Be Nice".into(),
         description: "A conduit Testserver".into(),
         registration_status: Registration::Open,
@@ -73,27 +77,30 @@ async fn details_endpoint(web::Path(server): web::Path<String>) -> impl Responde
 }
 
 #[instrument]
-#[get("/category/{category}")]
-async fn category_endpoint(web::Path(category): web::Path<String>) -> impl Responder {
+#[get("/category/{category_id}")]
+async fn category_endpoint(web::Path(category_id): web::Path<i64>) -> impl Responder {
     // TODO get available categories from database
     // TODO get available servers from database
     let test_category = Category {
+        id: category_id,
         name: "Test".into(),
         servers: vec![Server {
+            id: 0,
             name: "Conduit Nordgedanken".into(),
             url: "https://conduit.nordgedanken.dev".into(),
             logo_url: None,
             admins: vec!["@mtrnord:conduit.nordgedanken.dev".into()],
-            categories: vec!["Test".into(), "test2".into()],
+            categories: vec![],
             rules: "Be Nice".into(),
             description: "A conduit Testserver".into(),
             registration_status: Registration::Open,
         }],
     };
-    let current_category = if category == "Test" {
+    let current_category = if category_id == 0 {
         test_category.clone()
     } else {
         Category {
+            id: category_id,
             name: "Test2".into(),
             servers: vec![],
         }
@@ -102,6 +109,7 @@ async fn category_endpoint(web::Path(category): web::Path<String>) -> impl Respo
         categories: vec![
             test_category,
             Category {
+                id: 1,
                 name: "Test2".into(),
                 servers: vec![],
             },
@@ -118,19 +126,22 @@ async fn index() -> impl Responder {
     IndexTemplate {
         categories: vec![
             Category {
+                id: 0,
                 name: "Test".into(),
                 servers: vec![Server {
+                    id: 0,
                     name: "Conduit Nordgedanken".into(),
                     url: "https://conduit.nordgedanken.dev".into(),
                     logo_url: None,
                     admins: vec!["@mtrnord:conduit.nordgedanken.dev".into()],
-                    categories: vec!["Test".into(), "test2".into()],
+                    categories: vec![],
                     rules: "Be Nice".into(),
                     description: "A conduit Testserver".into(),
                     registration_status: Registration::Open,
                 }],
             },
             Category {
+                id: 1,
                 name: "Test2".into(),
                 servers: vec![],
             },
