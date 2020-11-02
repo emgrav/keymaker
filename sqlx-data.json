@@ -1,0 +1,173 @@
+{
+  "db": "PostgreSQL",
+  "002d293c501005c025256289cb7ef4f89f767c53ad62a544b68cb7e8f6750c96": {
+    "query": "SELECT * FROM categories",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
+  "530ee278df0dccdb97dbc83df81266c9fe223ac31093b9dc6e05bf791601fbd2": {
+    "query": "SELECT name as \"name!: String\", url as \"url!: String\", server_name as \"server_name!: String\", logo_url, admins as \"admins!: Vec<String>\", categories as \"categories!: Vec<String>\", rules as \"rules!: String\", description as \"description!: String\", registration_status as \"registration_status!: Registration\" FROM servers WHERE url = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name!: String",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "url!: String",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "server_name!: String",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "logo_url",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "admins!: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "categories!: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "rules!: String",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "description!: String",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "registration_status!: Registration",
+          "type_info": {
+            "Custom": {
+              "oid": 25565,
+              "name": "registration",
+              "kind": {
+                "Enum": [
+                  "open",
+                  "invite",
+                  "closed"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "b0cf652f9d84a671970d52568861ea0c0bfa9febc0dae98143e47c1f6117f680": {
+    "query": "SELECT * FROM categories WHERE name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
+  "b63a07c501be9e67941370995e8b7a26fd38cf5575abc9165b8030f339a51f47": {
+    "query": "SELECT server_url as \"server_url!: String\" FROM servers_categories WHERE category_name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "server_url!: String",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "fde5a68b6a1a1ee20fb74e4835588e855386502a814c880e20b23f1e936f3ff9": {
+    "query": "SELECT description FROM categories WHERE name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        true
+      ]
+    }
+  }
+}
