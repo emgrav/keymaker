@@ -11,8 +11,11 @@ use sqlx::PgPool;
 use std::env;
 use std::path::{Path, PathBuf};
 use tracing::{info, instrument, Level};
+use std::ffi::OsStr;
+use crate::errors::ServerError;
 
 mod models;
+mod errors;
 
 #[derive(Template, Debug)]
 #[template(path = "index.html")]
@@ -97,6 +100,10 @@ async fn servers() -> impl Responder {
 #[instrument]
 async fn css(req: HttpRequest) -> ActixResult<NamedFile> {
     let path: PathBuf = req.match_info().query("filename").parse().unwrap();
+    if path.extension()
+        .and_then(OsStr::to_str) != "css" {
+        Err(ServerError::PathTraversal)
+    }
     let real_path = Path::new("assets/css/").join(path);
     Ok(NamedFile::open(real_path)?)
 }
@@ -104,6 +111,10 @@ async fn css(req: HttpRequest) -> ActixResult<NamedFile> {
 #[instrument]
 async fn js(req: HttpRequest) -> ActixResult<NamedFile> {
     let path: PathBuf = req.match_info().query("filename").parse().unwrap();
+    if path.extension()
+        .and_then(OsStr::to_str) != "js" {
+        Err(ServerError::PathTraversal)
+    }
     let real_path = Path::new("assets/js/").join(path);
     Ok(NamedFile::open(real_path)?)
 }
