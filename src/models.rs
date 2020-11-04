@@ -55,8 +55,12 @@ impl CategoryDB {
         Ok(category)
     }
     pub async fn get_category(self, pg_pool: &PgPool) -> anyhow::Result<Category> {
-        let category = sqlx::query!(r#"SELECT description FROM categories WHERE name = $1"#, &self.name).fetch_one(pg_pool)
-            .await?;
+        let category = sqlx::query!(
+            r#"SELECT description FROM categories WHERE name = $1"#,
+            &self.name
+        )
+        .fetch_one(pg_pool)
+        .await?;
         let mut servers = vec![];
         let servers_raw = sqlx::query!(r#"SELECT server_url as "server_url!: String" FROM servers_categories WHERE category_name = $1"#, &self.name).fetch_all(pg_pool)
             .await?;

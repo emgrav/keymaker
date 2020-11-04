@@ -1,21 +1,21 @@
 #![allow(dead_code)]
 
+use crate::errors::ServerError;
 use crate::models::{Category, CategoryDB, Registration, Server};
 use actix_files::NamedFile;
-use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer, Responder, Result as ActixResult};
+use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use anyhow::Result;
 use askama_actix::{Template, TemplateIntoResponse};
 use dotenv::dotenv;
 use listenfd::ListenFd;
 use sqlx::PgPool;
 use std::env;
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use tracing::{info, instrument, Level};
-use std::ffi::OsStr;
-use crate::errors::ServerError;
 
-mod models;
 mod errors;
+mod models;
 
 #[derive(Template, Debug)]
 #[template(path = "index.html")]
@@ -53,21 +53,27 @@ async fn details_endpoint(web::Path(server_url): web::Path<String>) -> impl Resp
 
 #[instrument]
 #[get("/category/{category_name}")]
-async fn category_endpoint(web::Path(category_name): web::Path<String>, db_pool: web::Data<PgPool>) -> impl Responder {
+async fn category_endpoint(
+    web::Path(category_name): web::Path<String>,
+    db_pool: web::Data<PgPool>,
+) -> impl Responder {
     let result = CategoryDB::get_all(db_pool.get_ref()).await;
     match result {
         Ok(categories) => {
-            let current_category = categories.clone().into_iter().find(|category| category.name == category_name);
+            let current_category = categories
+                .clone()
+                .into_iter()
+                .find(|category| category.name == category_name);
             let template_result = IndexTemplate {
                 categories,
                 current_category,
             }
-                .into_response();
+            .into_response();
             match template_result {
                 Ok(r) => r,
                 Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
             }
-        },
+        }
         _ => HttpResponse::InternalServerError().body("Failed to load categories"),
     }
 }
@@ -81,12 +87,13 @@ async fn index(db_pool: web::Data<PgPool>) -> impl Responder {
             let template_result = IndexTemplate {
                 categories,
                 current_category: None,
-            }.into_response();
+            }
+            .into_response();
             match template_result {
                 Ok(r) => r,
                 Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
             }
-        },
+        }
         _ => HttpResponse::InternalServerError().body("Failed to load categories"),
     }
 }
@@ -98,22 +105,20 @@ async fn servers() -> impl Responder {
 }
 
 #[instrument]
-async fn css(req: HttpRequest) -> ActixResult<NamedFile> {
+async fn css(req: HttpRequest) -> actix_web::Result<NamedFile> {
     let path: PathBuf = req.match_info().query("filename").parse().unwrap();
-    if path.extension()
-        .and_then(OsStr::to_str) != "css" {
-        Err(ServerError::PathTraversal)
+    if path.extension().and_then(OsStr::to_str) != Some("css") {
+        return Err(ServerError::PathTraversal.into());
     }
     let real_path = Path::new("assets/css/").join(path);
     Ok(NamedFile::open(real_path)?)
 }
 
 #[instrument]
-async fn js(req: HttpRequest) -> ActixResult<NamedFile> {
+async fn js(req: HttpRequest) -> actix_web::Result<NamedFile> {
     let path: PathBuf = req.match_info().query("filename").parse().unwrap();
-    if path.extension()
-        .and_then(OsStr::to_str) != "js" {
-        Err(ServerError::PathTraversal)
+    if path.extension().and_then(OsStr::to_str) != Some("js") {
+        return Err(ServerError::PathTraversal.into());
     }
     let real_path = Path::new("assets/js/").join(path);
     Ok(NamedFile::open(real_path)?)
