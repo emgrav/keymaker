@@ -35,7 +35,7 @@ pub struct Category {
 }
 
 impl CategoryDB {
-    pub async fn get_all(pg_pool: &PgPool) -> anyhow::Result<Vec<Category>> {
+    pub async fn get_all(pg_pool: &PgPool) -> color_eyre::Result<Vec<Category>> {
         let categories = sqlx::query_as!(CategoryDB, "SELECT * FROM categories")
             .fetch_all(pg_pool)
             .await?;
@@ -46,7 +46,7 @@ impl CategoryDB {
 
         Ok(categories_result)
     }
-    pub async fn get_by_name(name: String, pg_pool: &PgPool) -> anyhow::Result<CategoryDB> {
+    pub async fn get_by_name(name: String, pg_pool: &PgPool) -> color_eyre::Result<CategoryDB> {
         let category =
             sqlx::query_as!(CategoryDB, "SELECT * FROM categories WHERE name = $1", name)
                 .fetch_optional(pg_pool)
@@ -54,7 +54,7 @@ impl CategoryDB {
                 .unwrap();
         Ok(category)
     }
-    pub async fn get_category(self, pg_pool: &PgPool) -> anyhow::Result<Category> {
+    pub async fn get_category(self, pg_pool: &PgPool) -> color_eyre::Result<Category> {
         let category = sqlx::query!(
             r#"SELECT description FROM categories WHERE name = $1"#,
             &self.name
