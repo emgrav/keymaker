@@ -4,7 +4,7 @@ use crate::errors::ServerError;
 use crate::models::{Category, CategoryDB, Registration, Server};
 use actix_files::NamedFile;
 use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
-use anyhow::Result;
+use color_eyre::Result;
 use askama_actix::{Template, TemplateIntoResponse};
 use dotenv::dotenv;
 use listenfd::ListenFd;
