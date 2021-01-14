@@ -36,38 +36,40 @@
             </div>
         </nav>
     </header>
-    <div class="wizard-content">
-        <aside>
-            <!-- Left sidebar -->
-            <div class="row">
-                <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
-                    <div class="sidebar-sticky">
-                        {% match current_category %}
-                            {% when Some with (val) %}
-                            <a class="nav-link" href="/">
-                                Choose your Homeserver 
-                            </a>
-                            {% when None %}
-                            <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/"
-                                tabindex="-1" role="button" aria-disabled="true">
-                                <span data-feather="home"></span>
-                                Choose your Homeserver <span class="sr-only">(current)</span>
-                            </a>
-                        {% endmatch %}
-    
-                        <!-- TODO Add Search -->
-                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                            <span>Categories:</span>
-                        </h6>
-                        <ul class="nav flex-column mb-2">
-                            {% for category in categories %}
-                            <li class="nav-item">
-                                <!--TODO Make sure to actually mark the active as active and not the first-->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="wizard-content">
+                <aside>
+                    <!-- Left sidebar -->
+                    <div class="row">
+                        <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
+                            <div class="sidebar-sticky">
                                 {% match current_category %}
-                                    {% when Some with (val) %}
+                                {% when Some with (val) %}
+                                <a class="nav-link" href="/">
+                                    Choose your Homeserver
+                                </a>
+                                {% when None %}
+                                <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/"
+                                   tabindex="-1" role="button" aria-disabled="true">
+                                    <span data-feather="home"></span>
+                                    Choose your Homeserver <span class="sr-only">(current)</span>
+                                </a>
+                                {% endmatch %}
+
+                                <!-- TODO Add Search -->
+                                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                                    <span>Categories:</span>
+                                </h6>
+                                <ul class="nav flex-column mb-2">
+                                    {% for category in categories %}
+                                    <li class="nav-item">
+                                        <!--TODO Make sure to actually mark the active as active and not the first-->
+                                        {% match current_category %}
+                                        {% when Some with (val) %}
                                         {% if val.name == category.name %}
                                         <a style="margin: 8px; margin-top:16px;" class="nav-link active btn btn-light btn-sidebar btn-lg" href="/category/{{ category.name }}"
-                                            tabindex="-1" role="button" aria-disabled="true">
+                                           tabindex="-1" role="button" aria-disabled="true">
                                             <span data-feather="home"></span>
                                             {{ category.name }} <span class="sr-only">(current)</span>
                                         </a>
@@ -76,138 +78,141 @@
                                             {{ category.name }}
                                         </a>
                                         {% endif %}
-                                    {% when None %}
-                                    <a class="nav-link" href="/category/{{ category.name }}">
-                                        {{ category.name }}
-                                    </a>
-                                {% endmatch %}
-                                
-                            </li>
-                            {% endfor %}
-                        </ul>
+                                        {% when None %}
+                                        <a class="nav-link" href="/category/{{ category.name }}">
+                                            {{ category.name }}
+                                        </a>
+                                        {% endmatch %}
+
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </nav>
                     </div>
-                </nav>
-            </div>
-        </aside>
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-            <!-- Main -->
-            {% match current_category %}
-                {% when Some with (val) %}
-                <h1 class="content-title">{{val.name}}</h1>
-                {% match val.description %}
+                </aside>
+                <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                    <!-- Main -->
+                    {% match current_category %}
+                    {% when Some with (val) %}
+                    <h1 class="content-title">{{val.name}}</h1>
+                    {% match val.description %}
                     {% when Some with (description) %}
                     <p>
                         {{ description }}
                     </p>
                     {% when None %}
-                {% endmatch %}
-                <div class="card-columns">
-                    {% for server in val.servers %}
+                    {% endmatch %}
+                    <div class="card-columns">
+                        {% for server in val.servers %}
 
-                    
-                    <!-- Modal -->
-                    <div class="modal fade" id="joinModal" tabindex="-1" role="dialog" aria-labelledby="joinModalLabel" aria-hidden="true" style="color: black;">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="joinModalLabel">Join Server</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <h6>Choosing a client</h6>
 
-                                    <p>The easiest way to choose a client is to head over to <a href="https://matrix.org/" title="Matrix.org">Matrix.org</a> 
-                                        and scroll trough <a href="https://matrix.org/clients/" title="Matrix.org - Clients">the list of Clients</a>.
-                                    </p>
-                                    <p>
-                                        Our personal suggestions are <a href="https://fluffychat.im/de/" title="Fluffychat">Fluffychat</a> or the widely used <a href="https://element.io/" title="Element">Element</a> client.
-                                    </p>
+                        <!-- Modal -->
+                        <div class="modal fade" id="joinModal" tabindex="-1" role="dialog" aria-labelledby="joinModalLabel" aria-hidden="true" style="color: black;">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="joinModalLabel">Join Server</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h6>Choosing a client</h6>
 
-                                    <h6>Joining the server</h6>
-                                    <p>While each client does this slightly differnt the general process is similiar:</p>
-                                    <ul>
-                                        <li>Select the registration menu on the Login Page</li>
-                                        <li>Enter the server address: <kbd>{{ server.url }}</kbd> into the Homeserver field</li>
-                                        <li>Choose your favorite Username and Password</li>
-                                    </ul>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <p>The easiest way to choose a client is to head over to <a href="https://matrix.org/" title="Matrix.org">Matrix.org</a>
+                                            and scroll trough <a href="https://matrix.org/clients/" title="Matrix.org - Clients">the list of Clients</a>.
+                                        </p>
+                                        <p>
+                                            Our personal suggestions are <a href="https://fluffychat.im/de/" title="Fluffychat">Fluffychat</a> or the widely used <a href="https://element.io/" title="Element">Element</a> client.
+                                        </p>
+
+                                        <h6>Joining the server</h6>
+                                        <p>While each client does this slightly differnt the general process is similiar:</p>
+                                        <ul>
+                                            <li>Select the registration menu on the Login Page</li>
+                                            <li>Enter the server address: <kbd>{{ server.url }}</kbd> into the Homeserver field</li>
+                                            <li>Choose your favorite Username and Password</li>
+                                        </ul>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card">
-                        {% match server.logo_url %}
+                        <div class="card">
+                            {% match server.logo_url %}
                             {% when Some with (val) %}
                             <img src="{{val}}" class="card-img-top" alt="Logo">
                             {% when None %}
-                        {% endmatch %}
-                        <div class="card-body">
-                            <h5 class="card-title">{{server.name}}</h5>
-                            <p class="card-text">{{server.description}}</p>
-                            <a href="#" data-toggle="modal" data-target="#joinModal" class="btn btn-success">Join</a> <!--Todo add join dialog-->
-                            <a href="/details/{{server.url}}" class="btn btn-link">Details</a>
+                            {% endmatch %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{server.name}}</h5>
+                                <p class="card-text">{{server.description}}</p>
+                                <a href="#" data-toggle="modal" data-target="#joinModal" class="btn btn-success">Join</a> <!--Todo add join dialog-->
+                                <a href="/details/{{server.url}}" class="btn btn-link">Details</a>
+                            </div>
                         </div>
-                    </div>
-                        
-                    {% endfor %}
-                </div>
-                {% when None %}
-                <h1 class="content-title">Choose your Homeserver</h1>
-    
-                <p>
-                    All you need to do to sign-up is choose a Homeserver. Your Homeserver is the Home of your account in the Matrix. Its just like a e-mail.
-                </p>
 
-                <div class="container">
-                    <div class="row" style="margin-left: 0; margin-right: 0; padding-top: 15px; padding-bottom: 15px;">
-                        <div class="col-sm-6">
-                          <div class="card">
-                            <div class="card-body">
-                              <h5 class="card-title"><i class="bi bi-building"></i></h5>
-                              <p class="card-text">Each community is run by different people or organizations.</p>
-                              <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
+                        {% endfor %}
+                    </div>
+                    {% when None %}
+                    <h1 class="content-title">Choose your Homeserver</h1>
+
+                    <p>
+                        All you need to do to sign-up is choose a Homeserver. Your Homeserver is the Home of your account in the Matrix. Its just like a e-mail.
+                    </p>
+
+                    <div class="container">
+                        <div class="row" style="margin-left: 0; margin-right: 0; padding-top: 15px; padding-bottom: 15px;">
+                            <div class="col-sm-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-building"></i></h5>
+                                        <p class="card-text">Each community is run by different people or organizations.</p>
+                                        <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
+                                    </div>
+                                </div>
                             </div>
-                          </div>
+                            <div class="col-sm-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-chat-left-dots-fill"></i></h5>
+                                        <p class="card-text">Most servers can talk to each other. If not it is mentioned in the details of a server.</p>
+                                        <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-sm-6">
-                          <div class="card">
-                            <div class="card-body">
-                              <h5 class="card-title"><i class="bi bi-chat-left-dots-fill"></i></h5>
-                              <p class="card-text">Most servers can talk to each other. If not it is mentioned in the details of a server.</p>
-                              <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
+                        <div class="row" style="margin-left: 0; margin-right: 0; padding-top: 15px; padding-bottom: 15px;">
+                            <div class="col-sm-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-house-fill"></i></h5>
+                                        <p class="card-text">Treat Matrix as your home. Everyone is welcome.</p>
+                                        <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
+                                    </div>
+                                </div>
                             </div>
-                          </div>
+                            <div class="col-sm-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-suit-heart-fill"></i></h5>
+                                        <p class="card-text">We only list servers that follow strict <a href="#" title="Code of Conduct">guidelines</a>.</p>
+                                        <!--<a href="#" class="btn btn-primary">See code of conduct</a>-->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row" style="margin-left: 0; margin-right: 0; padding-top: 15px; padding-bottom: 15px;">
-                        <div class="col-sm-6">
-                          <div class="card">
-                            <div class="card-body">
-                              <h5 class="card-title"><i class="bi bi-house-fill"></i></h5>
-                              <p class="card-text">Treat Matrix as your home. Everyone is welcome.</p>
-                              <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-sm-6">
-                          <div class="card">
-                            <div class="card-body">
-                              <h5 class="card-title"><i class="bi bi-suit-heart-fill"></i></h5>
-                              <p class="card-text">We only list servers that follow strict <a href="#" title="Code of Conduct">guidelines</a>.</p>
-                              <!--<a href="#" class="btn btn-primary">See code of conduct</a>-->
-                            </div>
-                          </div>
-                        </div>
-                    </div>
-                </div>
-            {% endmatch %}
-        </main>
+                    {% endmatch %}
+                </main>
+            </div>
+        </div>
     </div>
+
     
 
     <footer class="text-muted">
