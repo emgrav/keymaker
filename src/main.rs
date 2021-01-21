@@ -153,7 +153,11 @@ async fn oauth_done(
             // TODO redirect to admin page
             // TODO Session handling
             return HttpResponse::Ok().body("Successful OAuth flow");
+        } else {
+            tracing::error!("Unexpected non 200 Code. Code was: {}", resp.status());
         }
+    } else {
+        tracing::error!("Unexpected error while getting resp");
     }
     HttpResponse::Unauthorized().body("Please try again!")
 }
