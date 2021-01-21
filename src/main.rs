@@ -148,16 +148,26 @@ async fn oauth_done(
         .form(&params)
         .send()
         .await;
-    if let Ok(resp) = resp {
-        if resp.status() == StatusCode::OK {
-            // TODO redirect to admin page
-            // TODO Session handling
-            return HttpResponse::Ok().body("Successful OAuth flow");
-        } else {
-            tracing::error!("Unexpected non 200 Code. Code was: {}", resp.status());
+    match resp {
+        Ok(resp) => {
+            if resp.status() == StatusCode::OK {
+                // TODO redirect to admin page
+                // TODO Session handling
+                return HttpResponse::Ok().body("Successful OAuth flow");
+            } else {
+                let status = resp.status();
+                let bytes = resp.bytes().await.unwrap();
+                let body = String::from_utf8_lossy(&bytes);
+                tracing::error!(
+                    "Unexpected non 200 Code. Code was: {}. Resp Body was: {:?}",
+                    status,
+                    body
+                );
+            }
         }
-    } else {
-        tracing::error!("Unexpected error while getting resp");
+        Err(e) => {
+            tracing::error!("Unexpected error while getting resp: {}", e);
+        }
     }
     HttpResponse::Unauthorized().body("Please try again!")
 }
