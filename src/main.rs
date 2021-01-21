@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::errors::ServerError;
-use crate::models::{Category, CategoryDB, OAuthTokenResp, OauthResponse, Registration, Server};
+use crate::models::{Category, CategoryDB, OauthResponse, Registration, Server};
 use actix_files::NamedFile;
 use actix_web::web::Query;
 use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
@@ -118,7 +118,11 @@ async fn oauth_done(
             error: Some("invalid_request".into()),
             error_description: Some("OAuth server did not return a code".into()),
         };
-        return OAuthErrorTemplate { error }.into_response();
+        let template_result = OAuthErrorTemplate { error }.into_response();
+        match template_result {
+            Ok(r) => r,
+            Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        }
     }
     if oauth_resp.error.is_some() {
         return OAuthErrorTemplate { error: oauth_resp }.into_response();
