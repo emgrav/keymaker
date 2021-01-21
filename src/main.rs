@@ -214,6 +214,7 @@ async fn js(req: HttpRequest) -> actix_web::Result<NamedFile> {
 #[instrument]
 #[actix_web::main]
 async fn main() -> Result<()> {
+    color_eyre::install()?;
     tracing_subscriber::fmt()
         // all spans/events with a level higher than DEBUG (e.g, info, warn, etc.)
         // will be written to stdout.
