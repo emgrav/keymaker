@@ -1,13 +1,15 @@
 #![allow(dead_code)]
 
 use crate::errors::ServerError;
-use crate::models::{Category, CategoryDB, Registration, Server};
+use crate::models::{Category, CategoryDB, OAuthTokenResp, OauthResponse, Registration, Server};
 use actix_files::NamedFile;
+use actix_web::web::Query;
 use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
-use color_eyre::Result;
 use askama_actix::{Template, TemplateIntoResponse};
+use color_eyre::Result;
 use dotenv::dotenv;
 use listenfd::ListenFd;
+use reqwest::StatusCode;
 use sqlx::PgPool;
 use std::env;
 use std::ffi::OsStr;
@@ -28,6 +30,12 @@ struct IndexTemplate {
 #[template(path = "details.html")]
 struct DetailsTemplate {
     server: Server,
+}
+
+#[derive(Template, Debug)]
+#[template(path = "oauth_error.html")]
+struct OAuthErrorTemplate {
+    error: OauthResponse,
 }
 
 #[instrument]
@@ -99,6 +107,47 @@ async fn index(db_pool: web::Data<PgPool>) -> impl Responder {
 }
 
 #[instrument]
+#[get("/oauth/done")]
+async fn oauth_done(
+    db_pool: web::Data<PgPool>,
+    Query(oauth_resp): Query<OauthResponse>,
+) -> impl Responder {
+    if oauth_resp.code.is_none() && oauth_resp.error.is_none() {
+        let error = OauthResponse {
+            code: None,
+            error: Some("invalid_request".into()),
+            error_description: Some("OAuth server did not return a code".into()),
+        };
+        return OAuthErrorTemplate { error }.into_response();
+    }
+    if oauth_resp.error.is_some() {
+        return OAuthErrorTemplate { error: oauth_resp }.into_response();
+    }
+
+    // FIXME use some config vars and cycle secret
+    let params = [
+        ("redirect_uri", "https://joinmatrix.rocks/admin"),
+        ("client_id", "keymaker"),
+        ("client_secret", "keymaker-secret"),
+        ("code", oauth_resp.code.unwrap()),
+        ("grant_type", "authorization_code"),
+    ];
+    let client = reqwest::Client::new();
+    let resp = client
+        .post("https://oauth.joinmatrix.rocks/oauth/token")
+        .form(&params)
+        .send()
+        .await?;
+    if resp.status() == StatusCode::OK {
+        // TODO redirect to admin page
+        // TODO Session handling
+        return HttpResponse::Ok()
+            .body("Successful OAuth flow")
+            .into_response();
+    }
+}
+
+#[instrument]
 #[get("/api/servers")]
 async fn servers() -> impl Responder {
     HttpResponse::Ok().body("{}")
@@ -149,6 +198,7 @@ async fn main() -> Result<()> {
             .service(category_endpoint)
             .service(servers)
             .service(details_endpoint)
+            .service(oauth_done)
             .route("/assets/{filename:.*.css}", web::get().to(css))
             .route("/assets/{filename:.*.js}", web::get().to(js))
     });

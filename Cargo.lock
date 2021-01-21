@@ -1276,6 +1276,7 @@ dependencies = [
  "dotenv",
  "listenfd",
  "reqwest",
+ "serde",
  "sqlx",
  "thiserror",
  "tokio",
