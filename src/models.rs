@@ -8,6 +8,17 @@ pub struct OauthResponse {
     pub(crate) error_description: Option<String>,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct OauthTokenResponse {
+    pub(crate) access_token: Option<String>,
+    pub(crate) token_type: Option<String>,
+    pub(crate) scope: Option<String>,
+    pub(crate) matrix_homeserver_url: Option<String>,
+    pub(crate) matrix_user_id: Option<String>,
+    pub(crate) error: Option<String>,
+    pub(crate) error_description: Option<String>,
+}
+
 #[derive(sqlx::Type, Debug, Clone)]
 #[sqlx(rename = "registration", rename_all = "lowercase")]
 pub enum Registration {

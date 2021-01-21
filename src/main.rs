@@ -2,7 +2,9 @@
 #![allow(clippy::async_yields_async)] // Actix-web makes issues
 
 use crate::errors::ServerError;
-use crate::models::{Category, CategoryDB, OauthResponse, Registration, Server};
+use crate::models::{
+    Category, CategoryDB, OauthResponse, OauthTokenResponse, Registration, Server,
+};
 use actix_files::NamedFile;
 use actix_web::web::Query;
 use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
@@ -136,7 +138,7 @@ async fn oauth_done(
     // FIXME use some config vars and cycle secret
     let code = oauth_resp.code.clone().unwrap();
     let params = [
-        ("redirect_uri", "https://joinmatrix.rocks/admin"),
+        ("redirect_uri", "https://joinmatrix.rocks/oauth/done"),
         ("client_id", "keymaker"),
         ("client_secret", "keymaker-secret"),
         ("code", &code),
@@ -153,6 +155,17 @@ async fn oauth_done(
             if resp.status() == StatusCode::OK {
                 // TODO redirect to admin page
                 // TODO Session handling
+                let json: OauthTokenResponse = resp.json::<OauthTokenResponse>().await.unwrap();
+                if let Some(mxid) = json.matrix_user_id {
+                    tracing::info!("MXID: {}", mxid);
+                } else if let Some(error) = json.error {
+                    tracing::error!(
+                        "Unexpected error. Code was: {}. Description: {:?}",
+                        error,
+                        json.error_description
+                    );
+                    return HttpResponse::Unauthorized().body("Please try again!");
+                }
                 return HttpResponse::Ok().body("Successful OAuth flow");
             } else {
                 let status = resp.status();
