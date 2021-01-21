@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![allow(clippy::async_yields_async)] // Actix-web makes issues
 
 use crate::errors::ServerError;
 use crate::models::{Category, CategoryDB, OauthResponse, Registration, Server};
@@ -119,21 +120,26 @@ async fn oauth_done(
             error_description: Some("OAuth server did not return a code".into()),
         };
         let template_result = OAuthErrorTemplate { error }.into_response();
-        match template_result {
+        return match template_result {
             Ok(r) => r,
             Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
-        }
+        };
     }
     if oauth_resp.error.is_some() {
-        return OAuthErrorTemplate { error: oauth_resp }.into_response();
+        let template_result = OAuthErrorTemplate { error: oauth_resp }.into_response();
+        return match template_result {
+            Ok(r) => r,
+            Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        };
     }
 
     // FIXME use some config vars and cycle secret
+    let code = oauth_resp.code.clone().unwrap();
     let params = [
         ("redirect_uri", "https://joinmatrix.rocks/admin"),
         ("client_id", "keymaker"),
         ("client_secret", "keymaker-secret"),
-        ("code", oauth_resp.code.unwrap().as_str()),
+        ("code", &code),
         ("grant_type", "authorization_code"),
     ];
     let client = reqwest::Client::new();
