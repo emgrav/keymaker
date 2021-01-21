@@ -12,7 +12,7 @@ use askama_actix::{Template, TemplateIntoResponse};
 use color_eyre::Result;
 use dotenv::dotenv;
 use listenfd::ListenFd;
-use reqwest::{Error, StatusCode};
+use reqwest::StatusCode;
 use sqlx::PgPool;
 use std::env;
 use std::ffi::OsStr;
