@@ -129,7 +129,7 @@ async fn oauth_done(
         ("redirect_uri", "https://joinmatrix.rocks/admin"),
         ("client_id", "keymaker"),
         ("client_secret", "keymaker-secret"),
-        ("code", oauth_resp.code.unwrap()),
+        ("code", oauth_resp.code.unwrap().as_str()),
         ("grant_type", "authorization_code"),
     ];
     let client = reqwest::Client::new();
@@ -137,14 +137,15 @@ async fn oauth_done(
         .post("https://oauth.joinmatrix.rocks/oauth/token")
         .form(&params)
         .send()
-        .await?;
-    if resp.status() == StatusCode::OK {
-        // TODO redirect to admin page
-        // TODO Session handling
-        return HttpResponse::Ok()
-            .body("Successful OAuth flow")
-            .into_response();
+        .await;
+    if let Ok(resp) = resp {
+        if resp.status() == StatusCode::OK {
+            // TODO redirect to admin page
+            // TODO Session handling
+            return HttpResponse::Ok().body("Successful OAuth flow");
+        }
     }
+    HttpResponse::Unauthorized().body("Please try again!")
 }
 
 #[instrument]

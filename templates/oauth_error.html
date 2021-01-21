@@ -1,7 +1,18 @@
 <html lang="en">
 <head><title>OAuth Error</title></head>
 <body>
-<h1>{{error.error}}</h1>
-<p>{{error.error_description}}</p>
+{% match error.error %}
+{% when Some with (val) %}
+<h1>{{val}}</h1>
+{% when None %}
+<h1>Unknown Error</h1>
+{% endmatch %}
+
+{% match error.error_description %}
+{% when Some with (val) %}
+<p>{{val}}</p>
+{% when None %}
+<p>Unknown Error</p>
+{% endmatch %}
 </body>
 </html>

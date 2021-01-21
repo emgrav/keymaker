@@ -1,16 +1,11 @@
 use serde::Deserialize;
 use sqlx::postgres::PgPool;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct OauthResponse {
     pub(crate) code: Option<String>,
     pub(crate) error: Option<String>,
     pub(crate) error_description: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct OAuthTokenResp {
-    pub(crate) access_token: String,
 }
 
 #[derive(sqlx::Type, Debug, Clone)]
