@@ -14,7 +14,7 @@
   <p align="center">
     Keymaker is a <a href="https://joinmastodon.org/communities">Mastodon Community Finder</a> based Matrix Community serverlist page Server.
     <br />
-    <a href="">View Demo (TODO)</a>
+    <a href="https://joinmatrix.rocks">View Demo</a>
     ·
     <a href="https://github.com/daydream-mx/keymaker/issues">Report Bug</a>
     ·
