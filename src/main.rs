@@ -2,13 +2,13 @@
 #![allow(clippy::async_yields_async)] // Actix-web makes issues
 
 use crate::errors::ServerError;
-use crate::models::{
-    Category, CategoryDB, OauthResponse, OauthTokenResponse, Registration, Server,
-};
+use crate::models::{CategoryDB, LoginData, Registration, Server};
+use crate::templates::{DetailsTemplate, IndexTemplate, LoginTemplate};
 use actix_files::NamedFile;
+use actix_session::{CookieSession, Session};
 use actix_web::web::Query;
 use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
-use askama_actix::{Template, TemplateIntoResponse};
+use askama_actix::TemplateIntoResponse;
 use color_eyre::Result;
 use dotenv::dotenv;
 use listenfd::ListenFd;
@@ -21,25 +21,8 @@ use tracing::{info, instrument, Level};
 
 mod errors;
 mod models;
-
-#[derive(Template, Debug)]
-#[template(path = "index.html")]
-struct IndexTemplate {
-    categories: Vec<Category>,
-    current_category: Option<Category>,
-}
-
-#[derive(Template, Debug)]
-#[template(path = "details.html")]
-struct DetailsTemplate {
-    server: Server,
-}
-
-#[derive(Template, Debug)]
-#[template(path = "oauth_error.html")]
-struct OAuthErrorTemplate {
-    error: OauthResponse,
-}
+mod templates;
+mod utils;
 
 #[instrument]
 #[get("/details/{server_url}")]
@@ -110,85 +93,29 @@ async fn index(db_pool: web::Data<PgPool>) -> impl Responder {
 }
 
 #[instrument]
-#[get("/oauth/done")]
-async fn oauth_done(
-    db_pool: web::Data<PgPool>,
-    Query(oauth_resp): Query<OauthResponse>,
-) -> impl Responder {
-    if oauth_resp.code.is_none() && oauth_resp.error.is_none() {
-        let error = OauthResponse {
-            code: None,
-            error: Some("invalid_request".into()),
-            error_description: Some("OAuth server did not return a code".into()),
-        };
-        let template_result = OAuthErrorTemplate { error }.into_response();
-        return match template_result {
-            Ok(r) => r,
-            Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
-        };
-    }
-    if oauth_resp.error.is_some() {
-        let template_result = OAuthErrorTemplate { error: oauth_resp }.into_response();
-        return match template_result {
-            Ok(r) => r,
-            Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
-        };
-    }
+#[get("/auth/login")]
+async fn auth_login() -> impl Responder {
+    LoginTemplate {}.into_response()
+}
 
-    // FIXME use some config vars and cycle secret
-    let code = oauth_resp.code.clone().unwrap();
-    let params = [
-        ("redirect_uri", "https://joinmatrix.rocks/oauth/done"),
-        ("client_id", "keymaker"),
-        ("client_secret", "keymaker-secret"),
-        ("code", &code),
-        ("grant_type", "authorization_code"),
-    ];
-    let client = reqwest::Client::new();
-    let resp = client
-        .post("https://oauth.joinmatrix.rocks/oauth/token")
-        .form(&params)
-        .send()
-        .await;
-    match resp {
-        Ok(resp) => {
-            if resp.status() == StatusCode::OK {
-                // TODO redirect to admin page
-                // TODO Session handling
-                match resp.json::<OauthTokenResponse>().await {
-                    Ok(json) => {
-                        if let Some(mxid) = json.matrix_user_id {
-                            tracing::info!("MXID: {}", mxid);
-                        } else if let Some(error) = json.error {
-                            tracing::error!(
-                                "Unexpected error. Code was: {}. Description: {:?}",
-                                error,
-                                json.error_description
-                            );
-                            return HttpResponse::Unauthorized().body("Please try again!");
-                        }
-                        return HttpResponse::Ok().body("Successful OAuth flow");
-                    }
-                    Err(e) => {
-                        tracing::error!("Unexpected error parsing json: {}", e);
-                    }
-                }
-            } else {
-                let status = resp.status();
-                let bytes = resp.bytes().await.unwrap();
-                let body = String::from_utf8_lossy(&bytes);
-                tracing::error!(
-                    "Unexpected non 200 Code. Code was: {}. Resp Body was: {:?}",
-                    status,
-                    body
-                );
+#[instrument(skip(session))]
+#[get("/auth/done")]
+async fn auth_done(session: Session, Query(login_data): Query<LoginData>) -> impl Responder {
+    if let Ok(Some(mxid)) = session.get::<String>("mxid") {
+        if let Ok(Some(server)) = session.get::<String>("server") {
+            if mxid == login_data.mxid && server == login_data.server {
+                // TODO redirect to admin panel
             }
         }
-        Err(e) => {
-            tracing::error!("Unexpected error while getting resp: {}", e);
-        }
     }
-    HttpResponse::Unauthorized().body("Please try again!")
+
+    // TODO use utils::resolve_server_name
+    // TODO Do https://matrix.org/docs/spec/server_server/latest#get-matrix-federation-v1-openid-userinfo
+    // TODO check if sub and mxid match
+    // TODO write session cookie
+    // TODO redirect to admin interface
+
+    HttpResponse::Ok().body("success")
 }
 
 #[instrument]
@@ -239,11 +166,16 @@ async fn main() -> Result<()> {
         App::new()
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
             .wrap(middleware::Compress::default())
+            .wrap(
+                CookieSession::private(&[0; 32]) // <- create cookie based session middleware
+                    .secure(false),
+            )
             .service(index)
             .service(category_endpoint)
             .service(servers)
             .service(details_endpoint)
-            .service(oauth_done)
+            .service(auth_login)
+            .service(auth_done)
             .route("/assets/{filename:.*.css}", web::get().to(css))
             .route("/assets/{filename:.*.js}", web::get().to(js))
     });

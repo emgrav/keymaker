@@ -2,21 +2,10 @@ use serde::Deserialize;
 use sqlx::postgres::PgPool;
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct OauthResponse {
-    pub(crate) code: Option<String>,
-    pub(crate) error: Option<String>,
-    pub(crate) error_description: Option<String>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct OauthTokenResponse {
-    pub(crate) access_token: Option<String>,
-    pub(crate) token_type: Option<String>,
-    pub(crate) scope: Option<String>,
-    pub(crate) matrix_homeserver_url: Option<String>,
-    pub(crate) matrix_user_id: Option<String>,
-    pub(crate) error: Option<String>,
-    pub(crate) error_description: Option<String>,
+pub struct LoginData {
+    pub(crate) token: String,
+    pub(crate) server: String,
+    pub(crate) mxid: String,
 }
 
 #[derive(sqlx::Type, Debug, Clone)]
