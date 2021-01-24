@@ -1,23 +1,33 @@
 #![allow(dead_code)]
 #![allow(clippy::async_yields_async)] // Actix-web makes issues
 
-use crate::errors::ServerError;
-use crate::models::{CategoryDB, LoginData, Registration, Server};
-use crate::templates::{DetailsTemplate, IndexTemplate, LoginTemplate};
+use crate::utils::check_logged_in;
+use crate::{
+    errors::ServerError,
+    models::{CategoryDB, LoginData, MatrixOpenIDResp, Registration, Server},
+    templates::{DetailsTemplate, IndexTemplate, LoginTemplate},
+    utils::{resolve_server_name, MatrixSSServername},
+};
 use actix_files::NamedFile;
 use actix_session::{CookieSession, Session};
-use actix_web::web::Query;
-use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_web::{
+    get, middleware,
+    web::{self, Query},
+    App, HttpRequest, HttpResponse, HttpServer, Responder,
+};
 use askama_actix::TemplateIntoResponse;
 use color_eyre::Result;
 use dotenv::dotenv;
 use listenfd::ListenFd;
-use reqwest::StatusCode;
+use reqwest::{Client, StatusCode};
 use sqlx::PgPool;
-use std::env;
-use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
+use std::{
+    env,
+    ffi::OsStr,
+    path::{Path, PathBuf},
+};
 use tracing::{info, instrument, Level};
+use tracing_actix_web::TracingLogger;
 
 mod errors;
 mod models;
@@ -92,30 +102,63 @@ async fn index(db_pool: web::Data<PgPool>) -> impl Responder {
     }
 }
 
-#[instrument]
+#[instrument(skip(session))]
 #[get("/auth/login")]
-async fn auth_login() -> impl Responder {
-    LoginTemplate {}.into_response()
+async fn auth_login(session: Session) -> impl Responder {
+    if let Some(resp) = check_logged_in(&session) {
+        // TODO redirect to admin panel
+        Ok(resp)
+    } else {
+        LoginTemplate {}.into_response()
+    }
 }
 
 #[instrument(skip(session))]
 #[get("/auth/done")]
-async fn auth_done(session: Session, Query(login_data): Query<LoginData>) -> impl Responder {
-    if let Ok(Some(mxid)) = session.get::<String>("mxid") {
-        if let Ok(Some(server)) = session.get::<String>("server") {
-            if mxid == login_data.mxid && server == login_data.server {
-                // TODO redirect to admin panel
-            }
-        }
+async fn auth_done(
+    session: Session,
+    Query(login_data): Query<LoginData>,
+) -> Result<HttpResponse, ServerError> {
+    if let Some(resp) = check_logged_in(&session) {
+        // TODO redirect to admin panel
+        return Ok(resp);
     }
 
-    // TODO use utils::resolve_server_name
-    // TODO Do https://matrix.org/docs/spec/server_server/latest#get-matrix-federation-v1-openid-userinfo
-    // TODO check if sub and mxid match
+    let server = resolve_server_name(login_data.server.clone()).await?;
+
+    let client = Client::new();
+    let resp = match server {
+        MatrixSSServername::IP(addr) => {
+            client
+                .get(&format!(
+                    "https://{}/_matrix/federation/v1/openid/userinfo?access_token={}",
+                    addr, login_data.token
+                ))
+                .header("Host", login_data.server.clone())
+                .send()
+                .await?
+        }
+        MatrixSSServername::Host(host) => {
+            reqwest::get(&format!(
+                "https://{}/_matrix/federation/v1/openid/userinfo?access_token={}",
+                host, login_data.token
+            ))
+            .await?
+        }
+    };
+    if resp.status() == StatusCode::OK {
+        let body = resp.json::<MatrixOpenIDResp>().await?;
+        if body.sub == login_data.mxid {
+            session.set("mxid", login_data.mxid)?;
+            session.set("server", login_data.server)?;
+            // TODO redirect to admin panel
+            return Ok(HttpResponse::Ok().body("success"));
+        }
+    }
     // TODO write session cookie
     // TODO redirect to admin interface
 
-    HttpResponse::Ok().body("success")
+    Err(ServerError::MatrixFederationWronglyConfigured)
 }
 
 #[instrument]
@@ -165,6 +208,7 @@ async fn main() -> Result<()> {
     let mut server = HttpServer::new(move || {
         App::new()
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
+            .wrap(TracingLogger)
             .wrap(middleware::Compress::default())
             .wrap(
                 CookieSession::private(&[0; 32]) // <- create cookie based session middleware

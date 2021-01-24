@@ -8,6 +8,17 @@ pub struct LoginData {
     pub(crate) mxid: String,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatrixSSWellKnown {
+    #[serde(rename = "m.server")]
+    pub(crate) server: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatrixOpenIDResp {
+    pub(crate) sub: String,
+}
+
 #[derive(sqlx::Type, Debug, Clone)]
 #[sqlx(rename = "registration", rename_all = "lowercase")]
 pub enum Registration {
