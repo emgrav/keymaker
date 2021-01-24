@@ -212,7 +212,7 @@ async fn main() -> Result<()> {
             .wrap(middleware::Compress::default())
             .wrap(
                 CookieSession::private(&[0; 32]) // <- create cookie based session middleware
-                    .secure(false),
+                    .secure(true),
             )
             .service(index)
             .service(category_endpoint)
