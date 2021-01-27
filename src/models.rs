@@ -38,6 +38,7 @@ pub struct Server {
     pub rules: String,
     pub description: String,
     pub registration_status: Registration,
+    pub verified: bool,
 }
 
 #[derive(Debug, Clone, sqlx::FromRow)]
@@ -85,7 +86,7 @@ impl CategoryDB {
             .await?;
         for server_categories in servers_raw {
             let server_url = server_categories.server_url;
-            let server = sqlx::query_as!(Server, r#"SELECT name as "name!: String", url as "url!: String", server_name as "server_name!: String", logo_url, admins as "admins!: Vec<String>", categories as "categories!: Vec<String>", rules as "rules!: String", description as "description!: String", registration_status as "registration_status!: Registration" FROM servers WHERE url = $1"#, server_url)
+            let server = sqlx::query_as!(Server, r#"SELECT name as "name!: String", url as "url!: String", server_name as "server_name!: String", logo_url, admins as "admins!: Vec<String>", categories as "categories!: Vec<String>", rules as "rules!: String", description as "description!: String", registration_status as "registration_status!: Registration", verified as "verified: bool" FROM servers WHERE url = $1"#, server_url)
                 .fetch_optional(pg_pool).await?.unwrap();
 
             servers.push(server);

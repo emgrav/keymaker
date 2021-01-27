@@ -48,6 +48,7 @@ async fn details_endpoint(web::Path(server_url): web::Path<String>) -> impl Resp
         rules: "Be Nice".into(),
         description: "A conduit Testserver".into(),
         registration_status: Registration::Open,
+        verified: true,
     };
     DetailsTemplate {
         server: current_server,

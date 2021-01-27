@@ -1,0 +1,1 @@
+ALTER TABLE servers ADD COLUMN verified BOOLEAN NOT NULL;
